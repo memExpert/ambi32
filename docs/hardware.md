@@ -23,6 +23,7 @@ and in the opposite corner.
 | Board supply | USB only. Never feed PSU +5 V into the board's 5V/VBUS: it back-powers the PC port |
 | PA0 (KEY) | Reserved for umcub entry |
 | PC13 (LED) | Frame reception indicator |
+| PA9 (USART1 TX) | Debug log (Debug builds only), 115200 8N1, to the RX of a USB-UART adapter |
 
 Without a buffer, 3.3 V on the inputs of a 5 V strip is marginal: then start at 6 MHz. The PSU should give at least
 8-10 A for full white, otherwise set the current limit in the settings. The WeAct V3.0 has a footprint for an SPI
@@ -41,6 +42,14 @@ flash on PA4-PA7 (to be confirmed on the board): it must be empty.
   forces B-valid itself — what the WeAct needs, as it has no VBUS line on PA9. Init:
   `tusb_init(0, &(tusb_rhport_init_t){ .role = TUSB_ROLE_DEVICE, .speed = TUSB_SPEED_AUTO });`,
   `OTG_FS_IRQHandler` calls `tud_int_handler(0)`, the loop calls `tud_task()`.
+
+- **Faults.** If the HSE or the PLL does not start, the LED flashes three times and the MCU resets (USB needs the
+  crystal), so a board without a working crystal shows repeating triple flashes. The clock security system resets the
+  MCU if the crystal fails later (NMI); a HardFault resets it too. The start-up also works when the ROM DFU
+  bootloader jumps in with its own clock and interrupts still running (`dfu-util ... :leave`).
+- **Debug log.** Debug builds print through newlib-nano `printf` into a 1 KiB ring buffer that the USART1 TX-empty
+  interrupt drains (lowest interrupt priority); the main loop never waits for the UART, bytes that do not fit are
+  dropped. Release builds contain no log and do not touch USART1.
 
 ## Dependencies
 

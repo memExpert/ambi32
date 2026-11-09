@@ -1,0 +1,27 @@
+/*
+ * Application linker script, STM32F4. Preprocessed with the board header:
+ * the image goes to AMBI_BOARD_APP_ADDR (0x08000000 without a bootloader,
+ * the umcub slot later). Needs -L port/arch/cortexm.
+ */
+#include "ambi_board.h"
+
+MEMORY
+{
+  FLASH (rx)  : ORIGIN = AMBI_BOARD_APP_ADDR, LENGTH = AMBI_BOARD_APP_SIZE
+  RAM   (xrw) : ORIGIN = AMBI_BOARD_RAM_ADDR, LENGTH = AMBI_BOARD_RAM_SIZE
+}
+
+/* The heap serves newlib-nano's stdio in Debug builds only (AMBI_LOG). */
+#if AMBI_LOG
+_Min_Heap_Size  = 0x400;
+#else
+_Min_Heap_Size  = 0;
+#endif
+_Min_Stack_Size = 0x1000;
+_estack = ORIGIN(RAM) + LENGTH(RAM);
+
+/* VTOR needs the vector table aligned to 128 words (PM0214 §4.4.4); the
+ * table starts at the image origin. */
+ASSERT(ORIGIN(FLASH) % 512 == 0, "AMBI_BOARD_APP_ADDR must be 512-byte aligned (VTOR)")
+
+INCLUDE cortexm_sections.ld.inc

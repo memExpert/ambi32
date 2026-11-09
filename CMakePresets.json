@@ -1,0 +1,29 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "toolchainFile": "${sourceDir}/cmake/arm-none-eabi.cmake",
+      "cacheVariables": { "AMBI_BOARD": "blackpill_f411ce" }
+    },
+    {
+      "name": "blackpill",
+      "displayName": "Black Pill (STM32F411CEU6), Release",
+      "inherits": "base",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+    },
+    {
+      "name": "blackpill-debug",
+      "displayName": "Black Pill (STM32F411CEU6), Debug with the UART log",
+      "inherits": "base",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
+    }
+  ],
+  "buildPresets": [
+    { "name": "blackpill", "configurePreset": "blackpill" },
+    { "name": "blackpill-debug", "configurePreset": "blackpill-debug" }
+  ]
+}
