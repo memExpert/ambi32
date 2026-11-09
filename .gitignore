@@ -1,0 +1,8 @@
+/build/
+/CMakeUserPresets.json
+.venv/
+__pycache__/
+*.pyc
+# IDE settings
+.vscode/
+.settings/
